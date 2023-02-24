@@ -9,6 +9,11 @@
 // - `Miss`
 //
 // You will need to complete 1b as well before you will be able to run this program successfully.
+enum Shot {
+    Bullseye,
+    Hit(f64),
+    Miss,
+}
 
 impl Shot {
     // Here is a method for the `Shot` enum you just defined.
@@ -18,6 +23,18 @@ impl Shot {
         // - return 2 points if `self` is a `Shot::Hit(x)` where x < 3.0
         // - return 1 point if `self` is a `Shot::Hit(x)` where x >= 3.0
         // - return 0 points if `self` is a Miss
+
+        match self {
+            Shot::Bullseye => 5,
+            Shot::Hit(x) => {
+                if x < 3.0 {
+                    2
+                } else {
+                    1
+                }
+            }
+            Shot::Miss => 0,
+        }
     }
 }
 
@@ -34,10 +51,14 @@ fn main() {
     //      - Less than 1.0 -- `Shot::Bullseye`
     //      - Between 1.0 and 5.0 -- `Shot::Hit(value)`
     //      - Greater than 5.0 -- `Shot::Miss`
-
+    arrow_coords.iter().for_each(|c| {
+        c.print_description();
+        shots.push(c.into());
+    });
 
     let mut total = 0;
     // 3. Finally, loop through each shot in shots and add its points to total
+    shots.into_iter().for_each(|s| total += s.points());
 
     println!("Final point total is: {}", total);
 }
@@ -49,6 +70,19 @@ struct Coord {
     y: f64,
 }
 
+impl From<&Coord> for Shot {
+    fn from(c: &Coord) -> Self {
+        let dist = c.distance_from_center();
+        if dist < 1.0 {
+            Shot::Bullseye
+        } else if dist < 5.0 {
+            Shot::Hit(dist)
+        } else {
+            Shot::Miss
+        }
+    }
+}
+
 impl Coord {
     fn distance_from_center(&self) -> f64 {
         (self.x.powf(2.0) + self.y.powf(2.0)).sqrt()
@@ -58,9 +92,9 @@ impl Coord {
             "coord is {:.1} away, at ({:.1}, {:.1})",
             self.distance_from_center(),
             self.x,
-            self.y);
+            self.y
+        );
     }
-
 }
 
 // Generate some random coordinates
